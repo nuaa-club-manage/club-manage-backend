@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir /s /b \"E:\\\\club_manage\\\\club-manage-backend\\\\src\\\\main\\\\java\\\\com\\\\nuaa\\\\club_manage_backend\")"
+    ]
+  }
+}
