@@ -23,10 +23,12 @@ public class WebMvcConfig implements WebMvcConfigurer {
         registry.addInterceptor(jwtInterceptor())
                 // 1. 拦截所有的 /api/ 开头的请求
                 .addPathPatterns("/api/**")
-                // 2. 划定白名单（不查身份证的地方）：登录和注册接口放行！
+                // 2. 划定白名单：登录和注册接口放行
                 .excludePathPatterns(
                         "/api/user/login",
-                        "/api/user/register"
+                        "/api/user/register",
+                        "/api/user/captcha",
+                        "/api/user/sendCode"
                 );
     }
 }
