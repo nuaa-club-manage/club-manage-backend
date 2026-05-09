@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Data
 @TableName("OrdinaryUser")
@@ -41,5 +41,5 @@ public class OrdinaryUser {
     private String school;
 
     @TableField("RegisterTime")
-    private LocalDateTime registerTime;
+    private LocalDate registerTime;
 }
