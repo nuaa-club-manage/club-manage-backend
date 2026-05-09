@@ -46,7 +46,7 @@ public class OrdinaryUserServiceImpl extends ServiceImpl<OrdinaryUserMapper, Ord
     public void sendVerifyCode(String phoneNumber) {
         OrdinaryUser user = this.lambdaQuery().eq(OrdinaryUser::getPhoneNumber, phoneNumber).one();
         if (user == null) {
-            throw new BusinessException("该手机号未注册");
+            throw new BusinessException("发送失败，请先注册账号");
         }
 
         String code = "888888";
