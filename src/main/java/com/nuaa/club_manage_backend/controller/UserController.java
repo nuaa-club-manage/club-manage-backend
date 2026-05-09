@@ -5,7 +5,9 @@ import com.nuaa.club_manage_backend.dto.req.UserLoginReqDTO;
 import com.nuaa.club_manage_backend.dto.req.UserRegisterReqDTO;
 import com.nuaa.club_manage_backend.dto.req.UserResetPwdReqDTO;
 import com.nuaa.club_manage_backend.dto.resp.CaptchaRespDTO;
+import com.nuaa.club_manage_backend.dto.resp.UserInfoRespDTO;
 import com.nuaa.club_manage_backend.service.IOrdinaryUserService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -35,12 +37,12 @@ public class UserController {
     }
 
     /**
-     * 发送重置密码验证码
+     * 获取当前登录用户信息
      */
-    @GetMapping("/sendResetCode")
-    public Result<String> sendResetCode(@RequestParam String contact) {
-        ordinaryUserService.sendResetCode(contact);
-        return Result.success("验证码发送成功");
+    @GetMapping("/info")
+    public Result<UserInfoRespDTO> getCurrentUserInfo(HttpServletRequest request) {
+        String userId = (String) request.getAttribute("currentUserId");
+        return Result.success(ordinaryUserService.getCurrentUserInfo(userId));
     }
 
     /**

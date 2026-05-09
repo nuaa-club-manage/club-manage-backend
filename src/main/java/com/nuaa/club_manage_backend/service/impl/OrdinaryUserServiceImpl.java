@@ -5,6 +5,7 @@ import com.nuaa.club_manage_backend.dto.req.UserLoginReqDTO;
 import com.nuaa.club_manage_backend.dto.req.UserRegisterReqDTO;
 import com.nuaa.club_manage_backend.dto.req.UserResetPwdReqDTO;
 import com.nuaa.club_manage_backend.dto.resp.CaptchaRespDTO;
+import com.nuaa.club_manage_backend.dto.resp.UserInfoRespDTO;
 import com.nuaa.club_manage_backend.entity.OrdinaryUser;
 import com.nuaa.club_manage_backend.exception.BusinessException;
 import com.nuaa.club_manage_backend.mapper.OrdinaryUserMapper;
@@ -67,42 +68,6 @@ public class OrdinaryUserServiceImpl extends ServiceImpl<OrdinaryUserMapper, Ord
             System.out.println("发送至手机: " + contact);
             System.out.println("验证码: " + code);
             System.out.println("========================");
-        }
-    }
-
-    @Override
-    public void sendResetCode(String contact) {
-        boolean isEmail = contact.contains("@");
-        boolean isPhone = contact.matches("\\d{11}");
-
-        if (!isEmail && !isPhone) {
-            throw new BusinessException("手机或邮箱格式不正确");
-        }
-
-        // 查询该联系方式是否已绑定账号
-        OrdinaryUser user = this.lambdaQuery()
-                .eq(OrdinaryUser::getPhoneNumber, contact)
-                .or()
-                .eq(OrdinaryUser::getUserMailbox, contact)
-                .one();
-        if (user == null) {
-            throw new BusinessException("该联系方式未绑定任何账号");
-        }
-
-        // 生成 6 位随机验证码
-        String code = String.valueOf((int) ((Math.random() * 900000) + 100000));
-        SMS_CODE_CACHE.put(contact, code);
-
-        if (isEmail) {
-            System.out.println("===== 邮件服务模拟（重置密码） =====");
-            System.out.println("发送至邮箱: " + contact);
-            System.out.println("验证码: " + code);
-            System.out.println("===================================");
-        } else {
-            System.out.println("===== 短信服务模拟（重置密码） =====");
-            System.out.println("发送至手机: " + contact);
-            System.out.println("验证码: " + code);
-            System.out.println("===================================");
         }
     }
 
@@ -208,5 +173,25 @@ public class OrdinaryUserServiceImpl extends ServiceImpl<OrdinaryUserMapper, Ord
         }
 
         return JwtUtils.generateToken(user.getUserId());
+    }
+
+    @Override
+    public UserInfoRespDTO getCurrentUserInfo(String userId) {
+        OrdinaryUser user = this.getById(userId);
+        if (user == null) {
+            throw new BusinessException("用户不存在");
+        }
+
+        UserInfoRespDTO dto = new UserInfoRespDTO();
+        dto.setUserId(user.getUserId());
+        dto.setUserName(user.getUserName());
+        dto.setPhoneNumber(user.getPhoneNumber());
+        dto.setUserMailbox(user.getUserMailbox());
+        dto.setRealName(user.getRealName());
+        dto.setGender(user.getGender());
+        dto.setDegree(user.getDegree());
+        dto.setSchool(user.getSchool());
+        dto.setRegisterTime(user.getRegisterTime());
+        return dto;
     }
 }
