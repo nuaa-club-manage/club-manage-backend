@@ -3,6 +3,7 @@ package com.nuaa.club_manage_backend.controller;
 import com.nuaa.club_manage_backend.common.Result;
 import com.nuaa.club_manage_backend.dto.req.UserLoginReqDTO;
 import com.nuaa.club_manage_backend.dto.req.UserRegisterReqDTO;
+import com.nuaa.club_manage_backend.dto.req.UserResetPwdReqDTO;
 import com.nuaa.club_manage_backend.dto.resp.CaptchaRespDTO;
 import com.nuaa.club_manage_backend.service.IOrdinaryUserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,24 @@ public class UserController {
     public Result<String> sendCode(@RequestParam String contact) {
         ordinaryUserService.sendVerifyCode(contact);
         return Result.success("验证码发送成功");
+    }
+
+    /**
+     * 发送重置密码验证码
+     */
+    @GetMapping("/sendResetCode")
+    public Result<String> sendResetCode(@RequestParam String contact) {
+        ordinaryUserService.sendResetCode(contact);
+        return Result.success("验证码发送成功");
+    }
+
+    /**
+     * 重置密码
+     */
+    @PostMapping("/resetPassword")
+    public Result<String> resetPassword(@Validated @RequestBody UserResetPwdReqDTO reqDTO) {
+        ordinaryUserService.resetPassword(reqDTO);
+        return Result.success("密码重置成功");
     }
 
     /**

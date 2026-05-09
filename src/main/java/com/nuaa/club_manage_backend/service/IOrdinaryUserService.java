@@ -3,6 +3,7 @@ package com.nuaa.club_manage_backend.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.nuaa.club_manage_backend.dto.req.UserLoginReqDTO;
 import com.nuaa.club_manage_backend.dto.req.UserRegisterReqDTO;
+import com.nuaa.club_manage_backend.dto.req.UserResetPwdReqDTO;
 import com.nuaa.club_manage_backend.dto.resp.CaptchaRespDTO;
 import com.nuaa.club_manage_backend.entity.OrdinaryUser;
 
@@ -26,4 +27,14 @@ public interface IOrdinaryUserService extends IService<OrdinaryUser> {
      * 用户注册
      */
     void register(UserRegisterReqDTO reqDTO);
+
+    /**
+     * 发送重置密码验证码
+     */
+    void sendResetCode(String contact);
+
+    /**
+     * 重置密码
+     */
+    void resetPassword(UserResetPwdReqDTO reqDTO);
 }

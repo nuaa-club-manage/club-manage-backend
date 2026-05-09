@@ -3,6 +3,7 @@ package com.nuaa.club_manage_backend.service.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.nuaa.club_manage_backend.dto.req.UserLoginReqDTO;
 import com.nuaa.club_manage_backend.dto.req.UserRegisterReqDTO;
+import com.nuaa.club_manage_backend.dto.req.UserResetPwdReqDTO;
 import com.nuaa.club_manage_backend.dto.resp.CaptchaRespDTO;
 import com.nuaa.club_manage_backend.entity.OrdinaryUser;
 import com.nuaa.club_manage_backend.exception.BusinessException;
@@ -52,7 +53,8 @@ public class OrdinaryUserServiceImpl extends ServiceImpl<OrdinaryUserMapper, Ord
             throw new BusinessException("手机或邮箱格式不正确");
         }
 
-        String code = "888888";
+        // 生成 6 位随机数字验证码
+        String code = String.valueOf((int) ((Math.random() * 900000) + 100000));
         SMS_CODE_CACHE.put(contact, code);
 
         if (isEmail) {
@@ -66,6 +68,66 @@ public class OrdinaryUserServiceImpl extends ServiceImpl<OrdinaryUserMapper, Ord
             System.out.println("验证码: " + code);
             System.out.println("========================");
         }
+    }
+
+    @Override
+    public void sendResetCode(String contact) {
+        boolean isEmail = contact.contains("@");
+        boolean isPhone = contact.matches("\\d{11}");
+
+        if (!isEmail && !isPhone) {
+            throw new BusinessException("手机或邮箱格式不正确");
+        }
+
+        // 查询该联系方式是否已绑定账号
+        OrdinaryUser user = this.lambdaQuery()
+                .eq(OrdinaryUser::getPhoneNumber, contact)
+                .or()
+                .eq(OrdinaryUser::getUserMailbox, contact)
+                .one();
+        if (user == null) {
+            throw new BusinessException("该联系方式未绑定任何账号");
+        }
+
+        // 生成 6 位随机验证码
+        String code = String.valueOf((int) ((Math.random() * 900000) + 100000));
+        SMS_CODE_CACHE.put(contact, code);
+
+        if (isEmail) {
+            System.out.println("===== 邮件服务模拟（重置密码） =====");
+            System.out.println("发送至邮箱: " + contact);
+            System.out.println("验证码: " + code);
+            System.out.println("===================================");
+        } else {
+            System.out.println("===== 短信服务模拟（重置密码） =====");
+            System.out.println("发送至手机: " + contact);
+            System.out.println("验证码: " + code);
+            System.out.println("===================================");
+        }
+    }
+
+    @Override
+    public void resetPassword(UserResetPwdReqDTO reqDTO) {
+        // 1. 校验验证码
+        String cachedCode = SMS_CODE_CACHE.get(reqDTO.getContact());
+        if (cachedCode == null || !cachedCode.equals(reqDTO.getVerifyCode())) {
+            throw new BusinessException("验证码错误或已失效");
+        }
+        SMS_CODE_CACHE.remove(reqDTO.getContact());
+
+        // 2. 根据联系方式查找用户
+        OrdinaryUser user = this.lambdaQuery()
+                .eq(OrdinaryUser::getPhoneNumber, reqDTO.getContact())
+                .or()
+                .eq(OrdinaryUser::getUserMailbox, reqDTO.getContact())
+                .one();
+        if (user == null) {
+            throw new BusinessException("该联系方式未绑定任何账号");
+        }
+
+        // 3. 更新密码
+        user.setUserPassword(reqDTO.getNewPassword());
+        this.updateById(user);
     }
 
     @Override
