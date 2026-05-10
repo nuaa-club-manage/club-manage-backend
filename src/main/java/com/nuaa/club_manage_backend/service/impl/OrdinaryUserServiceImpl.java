@@ -1,6 +1,8 @@
 package com.nuaa.club_manage_backend.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.nuaa.club_manage_backend.dto.req.UserChangePwdReqDTO;
+import com.nuaa.club_manage_backend.dto.req.UserInfoUpdateReqDTO;
 import com.nuaa.club_manage_backend.dto.req.UserLoginReqDTO;
 import com.nuaa.club_manage_backend.dto.req.UserRegisterReqDTO;
 import com.nuaa.club_manage_backend.dto.req.UserResetPwdReqDTO;
@@ -193,5 +195,44 @@ public class OrdinaryUserServiceImpl extends ServiceImpl<OrdinaryUserMapper, Ord
         dto.setSchool(user.getSchool());
         dto.setRegisterTime(user.getRegisterTime());
         return dto;
+    }
+
+    @Override
+    public void updateUserInfo(String userId, UserInfoUpdateReqDTO reqDTO) {
+        OrdinaryUser user = this.getById(userId);
+        if (user == null) {
+            throw new BusinessException("用户不存在");
+        }
+
+        user.setUserName(reqDTO.getUserName());
+        user.setPhoneNumber(reqDTO.getPhoneNumber());
+        user.setUserMailbox(reqDTO.getUserMailbox());
+        user.setRealName(reqDTO.getRealName());
+        user.setGender(reqDTO.getGender());
+        user.setDegree(reqDTO.getDegree());
+        user.setSchool(reqDTO.getSchool());
+
+        this.updateById(user);
+    }
+
+    @Override
+    public void changePassword(String userId, UserChangePwdReqDTO reqDTO) {
+        OrdinaryUser user = this.getById(userId);
+        if (user == null) {
+            throw new BusinessException("用户不存在");
+        }
+
+        // 校验原密码
+        if (!user.getUserPassword().equals(reqDTO.getOldPassword())) {
+            throw new BusinessException("原密码错误");
+        }
+
+        // 防呆：新密码不能和原密码相同
+        if (reqDTO.getOldPassword().equals(reqDTO.getNewPassword())) {
+            throw new BusinessException("新密码不能与原密码相同");
+        }
+
+        user.setUserPassword(reqDTO.getNewPassword());
+        this.updateById(user);
     }
 }

@@ -1,6 +1,8 @@
 package com.nuaa.club_manage_backend.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.nuaa.club_manage_backend.dto.req.UserChangePwdReqDTO;
+import com.nuaa.club_manage_backend.dto.req.UserInfoUpdateReqDTO;
 import com.nuaa.club_manage_backend.dto.req.UserLoginReqDTO;
 import com.nuaa.club_manage_backend.dto.req.UserRegisterReqDTO;
 import com.nuaa.club_manage_backend.dto.req.UserResetPwdReqDTO;
@@ -38,4 +40,14 @@ public interface IOrdinaryUserService extends IService<OrdinaryUser> {
      * 获取当前登录用户信息
      */
     UserInfoRespDTO getCurrentUserInfo(String userId);
+
+    /**
+     * 修改个人基本信息
+     */
+    void updateUserInfo(String userId, UserInfoUpdateReqDTO reqDTO);
+
+    /**
+     * 修改密码
+     */
+    void changePassword(String userId, UserChangePwdReqDTO reqDTO);
 }
