@@ -15,7 +15,7 @@ public class UserLoginReqDTO {
 
     private String verifyCode;   // 验证码登录时使用
 
-    private String phoneNumber;  // 验证码登录时使用（手机号接收验证码）
+    private String contact;      // 验证码登录时使用（手机号或邮箱）
 
     @NotBlank(message = "人机验证码凭证不能为空")
     private String captchaId;

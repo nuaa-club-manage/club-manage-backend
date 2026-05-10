@@ -155,21 +155,25 @@ public class OrdinaryUserServiceImpl extends ServiceImpl<OrdinaryUserMapper, Ord
                 throw new BusinessException("密码错误");
             }
         } else if (reqDTO.getLoginType() == 1) {
-            if (reqDTO.getPhoneNumber() == null || reqDTO.getPhoneNumber().isEmpty()) {
-                throw new BusinessException("手机号不能为空");
+            if (reqDTO.getContact() == null || reqDTO.getContact().isEmpty()) {
+                throw new BusinessException("手机号或邮箱不能为空");
             }
-            user = this.lambdaQuery().eq(OrdinaryUser::getPhoneNumber, reqDTO.getPhoneNumber()).one();
+            user = this.lambdaQuery()
+                    .eq(OrdinaryUser::getPhoneNumber, reqDTO.getContact())
+                    .or()
+                    .eq(OrdinaryUser::getUserMailbox, reqDTO.getContact())
+                    .one();
             if (user == null) {
-                throw new BusinessException("该手机号未注册");
+                throw new BusinessException("该账号未注册");
             }
             if (reqDTO.getVerifyCode() == null || reqDTO.getVerifyCode().isEmpty()) {
                 throw new BusinessException("验证码不能为空");
             }
-            String cachedCode = SMS_CODE_CACHE.get(reqDTO.getPhoneNumber());
+            String cachedCode = SMS_CODE_CACHE.get(reqDTO.getContact());
             if (cachedCode == null || !cachedCode.equals(reqDTO.getVerifyCode())) {
                 throw new BusinessException("验证码错误或已过期");
             }
-            SMS_CODE_CACHE.remove(reqDTO.getPhoneNumber());
+            SMS_CODE_CACHE.remove(reqDTO.getContact());
         } else {
             throw new BusinessException("不支持的登录类型");
         }
