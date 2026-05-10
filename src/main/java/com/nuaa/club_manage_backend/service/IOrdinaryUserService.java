@@ -50,4 +50,9 @@ public interface IOrdinaryUserService extends IService<OrdinaryUser> {
      * 修改密码
      */
     void changePassword(String userId, UserChangePwdReqDTO reqDTO);
+
+    /**
+     * 注销账户
+     */
+    void cancelAccount(String userId);
 }

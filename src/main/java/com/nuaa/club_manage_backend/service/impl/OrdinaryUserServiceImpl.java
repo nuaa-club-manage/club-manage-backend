@@ -1,5 +1,6 @@
 package com.nuaa.club_manage_backend.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.nuaa.club_manage_backend.dto.req.UserChangePwdReqDTO;
 import com.nuaa.club_manage_backend.dto.req.UserInfoUpdateReqDTO;
@@ -8,11 +9,23 @@ import com.nuaa.club_manage_backend.dto.req.UserRegisterReqDTO;
 import com.nuaa.club_manage_backend.dto.req.UserResetPwdReqDTO;
 import com.nuaa.club_manage_backend.dto.resp.CaptchaRespDTO;
 import com.nuaa.club_manage_backend.dto.resp.UserInfoRespDTO;
+import com.nuaa.club_manage_backend.entity.Club;
+import com.nuaa.club_manage_backend.entity.ClubActivity;
+import com.nuaa.club_manage_backend.entity.ClubMember;
 import com.nuaa.club_manage_backend.entity.OrdinaryUser;
+import com.nuaa.club_manage_backend.entity.RatingClub;
+import com.nuaa.club_manage_backend.entity.RegistrationInfo;
 import com.nuaa.club_manage_backend.exception.BusinessException;
+import com.nuaa.club_manage_backend.mapper.ClubActivityMapper;
+import com.nuaa.club_manage_backend.mapper.ClubMapper;
+import com.nuaa.club_manage_backend.mapper.ClubMemberMapper;
 import com.nuaa.club_manage_backend.mapper.OrdinaryUserMapper;
+import com.nuaa.club_manage_backend.mapper.RatingClubMapper;
+import com.nuaa.club_manage_backend.mapper.RegistrationInfoMapper;
+import com.nuaa.club_manage_backend.mapper.UserMapper;
 import com.nuaa.club_manage_backend.service.IOrdinaryUserService;
 import com.nuaa.club_manage_backend.utils.JwtUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -32,6 +45,19 @@ public class OrdinaryUserServiceImpl extends ServiceImpl<OrdinaryUserMapper, Ord
      * 图形验证码缓存（key = captchaId, value = 验证码文本）
      */
     private static final Map<String, String> CAPTCHA_CACHE = new ConcurrentHashMap<>();
+
+    @Autowired
+    private ClubMapper clubMapper;
+    @Autowired
+    private ClubActivityMapper clubActivityMapper;
+    @Autowired
+    private ClubMemberMapper clubMemberMapper;
+    @Autowired
+    private RegistrationInfoMapper registrationInfoMapper;
+    @Autowired
+    private RatingClubMapper ratingClubMapper;
+    @Autowired
+    private UserMapper userMapper;
 
     @Override
     public CaptchaRespDTO getCaptcha() {
@@ -238,5 +264,24 @@ public class OrdinaryUserServiceImpl extends ServiceImpl<OrdinaryUserMapper, Ord
 
         user.setUserPassword(reqDTO.getNewPassword());
         this.updateById(user);
+    }
+
+    @Override
+    public void cancelAccount(String userId) {
+        OrdinaryUser user = this.getById(userId);
+        if (user == null) {
+            throw new BusinessException("用户不存在或已注销");
+        }
+
+        // 先删除关联表数据
+        clubMemberMapper.delete(new QueryWrapper<ClubMember>().eq("UserID", userId));
+        registrationInfoMapper.delete(new QueryWrapper<RegistrationInfo>().eq("UserID", userId));
+        ratingClubMapper.delete(new QueryWrapper<RatingClub>().eq("UserID", userId));
+        clubActivityMapper.delete(new QueryWrapper<ClubActivity>().eq("UserID", userId));
+        clubMapper.delete(new QueryWrapper<Club>().eq("UserID", userId));
+        userMapper.deleteById(userId);
+
+        // 最后删除用户本身
+        this.removeById(userId);
     }
 }

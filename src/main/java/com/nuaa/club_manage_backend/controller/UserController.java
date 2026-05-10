@@ -59,6 +59,16 @@ public class UserController {
     }
 
     /**
+     * 注销账户
+     */
+    @DeleteMapping("/account")
+    public Result<String> cancelAccount(HttpServletRequest request) {
+        String userId = (String) request.getAttribute("currentUserId");
+        ordinaryUserService.cancelAccount(userId);
+        return Result.success("账户注销成功");
+    }
+
+    /**
      * 修改密码（已登录状态）
      */
     @PutMapping("/password")
