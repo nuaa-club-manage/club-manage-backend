@@ -45,6 +45,7 @@ CREATE TABLE `Club` (
 -- 5. ClubActivity类[cite: 2]
 CREATE TABLE `ClubActivity` (
   `ActivityID` varchar(255) NOT NULL,
+  `ClubID` varchar(255) NOT NULL,
   `UserID` varchar(255) NOT NULL,
   `Title` varchar(255) NOT NULL,
   `Content` text,

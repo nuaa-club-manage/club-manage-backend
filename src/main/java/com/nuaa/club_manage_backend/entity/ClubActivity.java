@@ -13,6 +13,9 @@ public class ClubActivity {
     @TableId("ActivityID")
     private String activityId;
 
+    @TableField("ClubID")
+    private String clubId;
+
     @TableField("UserID")
     private String userId;
 
