@@ -1,6 +1,7 @@
 package com.nuaa.club_manage_backend.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.nuaa.club_manage_backend.dto.req.UserChangePwdReqDTO;
 import com.nuaa.club_manage_backend.dto.req.UserInfoUpdateReqDTO;
@@ -277,8 +278,8 @@ public class OrdinaryUserServiceImpl extends ServiceImpl<OrdinaryUserMapper, Ord
         clubMemberMapper.delete(new QueryWrapper<ClubMember>().eq("UserID", userId));
         registrationInfoMapper.delete(new QueryWrapper<RegistrationInfo>().eq("UserID", userId));
         ratingClubMapper.delete(new QueryWrapper<RatingClub>().eq("UserID", userId));
-        clubActivityMapper.delete(new QueryWrapper<ClubActivity>().eq("UserID", userId));
-        clubMapper.delete(new QueryWrapper<Club>().eq("UserID", userId));
+        clubActivityMapper.update(null, new UpdateWrapper<ClubActivity>().eq("UserID", userId).set("UserID", ""));
+        clubMapper.update(null, new UpdateWrapper<Club>().eq("UserID", userId).set("UserID", ""));
         userMapper.deleteById(userId);
 
         // 最后删除用户本身
