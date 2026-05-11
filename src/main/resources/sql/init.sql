@@ -37,8 +37,6 @@ CREATE TABLE `Club` (
   `ClubName` varchar(255) NOT NULL,
   `Clubinformation` text,
   `School` varchar(255) DEFAULT NULL,
-  `ClubCategory` varchar(255) DEFAULT NULL,
-  `ClubCoverImage` varchar(255) DEFAULT NULL,
   `ClubState` varchar(255) DEFAULT NULL,
   `EstablishmentTime` datetime DEFAULT NULL,
   PRIMARY KEY (`Clubid`)

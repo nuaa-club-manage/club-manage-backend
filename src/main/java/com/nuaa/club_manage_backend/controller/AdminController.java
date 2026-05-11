@@ -6,11 +6,15 @@ import com.nuaa.club_manage_backend.dto.req.AdminEditUserReqDTO;
 import com.nuaa.club_manage_backend.dto.req.AdminLoginReqDTO;
 import com.nuaa.club_manage_backend.dto.req.AdminUserSearchReqDTO;
 import com.nuaa.club_manage_backend.dto.req.ClubAuditReqDTO;
+import com.nuaa.club_manage_backend.dto.req.ClubManagerSetReqDTO;
 import com.nuaa.club_manage_backend.dto.resp.UserInfoRespDTO;
+import com.nuaa.club_manage_backend.entity.Administrator;
+import com.nuaa.club_manage_backend.dto.resp.ClubMemberListRespDTO;
 import com.nuaa.club_manage_backend.entity.Administrator;
 import com.nuaa.club_manage_backend.entity.Club;
 import com.nuaa.club_manage_backend.exception.BusinessException;
 import com.nuaa.club_manage_backend.service.IAdministratorService;
+import com.nuaa.club_manage_backend.service.IClubMemberService;
 import com.nuaa.club_manage_backend.service.IClubService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +31,8 @@ public class AdminController {
     private IAdministratorService administratorService;
     @Autowired
     private IClubService clubService;
+    @Autowired
+    private IClubMemberService clubMemberService;
 
     /**
      * 管理员登录
@@ -87,6 +93,38 @@ public class AdminController {
             return Result.success("社团成立申请审核通过");
         } else {
             return Result.success("社团成立申请已拒绝");
+        }
+    }
+
+    /**
+     * 系统管理员查看所有已成立社团的成员名单
+     */
+    @GetMapping("/clubs/members")
+    public Result<List<ClubMemberListRespDTO>> getAllClubMembers(HttpServletRequest request) {
+        String adminId = (String) request.getAttribute("currentUserId");
+        Administrator admin = administratorService.getById(adminId);
+        if (admin == null) {
+            throw new BusinessException("无权访问，仅管理员可执行此操作");
+        }
+        return Result.success(clubMemberService.getAllClubMembers());
+    }
+
+    /**
+     * 系统管理员设置/取消社团管理员
+     */
+    @PutMapping("/club/manager")
+    public Result<String> setClubManager(HttpServletRequest request,
+                                         @Validated @RequestBody ClubManagerSetReqDTO reqDTO) {
+        String adminId = (String) request.getAttribute("currentUserId");
+        Administrator admin = administratorService.getById(adminId);
+        if (admin == null) {
+            throw new BusinessException("无权访问，仅管理员可执行此操作");
+        }
+        clubMemberService.setClubManager(reqDTO);
+        if (Boolean.TRUE.equals(reqDTO.getSetManager())) {
+            return Result.success("管理员权限设置成功");
+        } else {
+            return Result.success("管理员权限已取消");
         }
     }
 }

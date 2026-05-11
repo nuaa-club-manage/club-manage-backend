@@ -56,8 +56,6 @@ public class ClubServiceImpl extends ServiceImpl<ClubMapper, Club> implements IC
         club.setUserId(userId);
         club.setClubName(reqDTO.getClubName());
         club.setClubInformation(reqDTO.getClubInformation());
-        club.setClubCategory(reqDTO.getClubCategory());
-        club.setClubCoverImage(reqDTO.getClubCoverImage());
         club.setClubState("待审核");
         club.setEstablishmentTime(LocalDateTime.now());
 
@@ -155,8 +153,6 @@ public class ClubServiceImpl extends ServiceImpl<ClubMapper, Club> implements IC
         club.setClubName(reqDTO.getClubName());
         club.setClubInformation(reqDTO.getClubInformation());
         club.setSchool(reqDTO.getSchool());
-        club.setClubCategory(reqDTO.getClubCategory());
-        club.setClubCoverImage(reqDTO.getClubCoverImage());
         this.updateById(club);
     }
 

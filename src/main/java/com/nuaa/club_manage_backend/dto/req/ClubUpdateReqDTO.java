@@ -17,10 +17,4 @@ public class ClubUpdateReqDTO {
 
     @NotBlank(message = "所属学校不能为空")
     private String school;
-
-    @NotBlank(message = "社团分类不能为空")
-    private String clubCategory;
-
-    @NotBlank(message = "社团封面图片URL不能为空")
-    private String clubCoverImage;
 }
