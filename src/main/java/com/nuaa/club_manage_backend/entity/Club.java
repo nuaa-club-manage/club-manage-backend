@@ -25,6 +25,12 @@ public class Club {
     @TableField("School")
     private String school;
 
+    @TableField("ClubCategory")
+    private String clubCategory;
+
+    @TableField("ClubCoverImage")
+    private String clubCoverImage;
+
     @TableField("ClubState")
     private String clubState;
 
