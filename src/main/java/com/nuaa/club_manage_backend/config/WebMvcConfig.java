@@ -3,6 +3,7 @@ package com.nuaa.club_manage_backend.config;
 import com.nuaa.club_manage_backend.config.interceptor.JwtInterceptor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -32,5 +33,14 @@ public class WebMvcConfig implements WebMvcConfigurer {
                         "/api/user/resetPassword",
                         "/api/admin/login"
                 );
+    }
+
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/api/**")
+                .allowedOriginPatterns("*")
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                .allowedHeaders("*")
+                .allowCredentials(true);
     }
 }
