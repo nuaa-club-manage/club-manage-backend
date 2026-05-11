@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.nuaa.club_manage_backend.dto.req.AdminEditUserReqDTO;
 import com.nuaa.club_manage_backend.dto.req.AdminLoginReqDTO;
 import com.nuaa.club_manage_backend.dto.req.AdminUserSearchReqDTO;
 import com.nuaa.club_manage_backend.dto.resp.UserInfoRespDTO;
@@ -85,5 +86,32 @@ public class AdministratorServiceImpl extends ServiceImpl<AdministratorMapper, A
         }).collect(Collectors.toList()));
 
         return resultPage;
+    }
+
+    @Override
+    public void updateUserBySystemAdmin(String adminID, AdminEditUserReqDTO reqDTO) {
+        // 1. 越权校验：确认操作者是系统管理员
+        Administrator admin = this.getById(adminID);
+        if (admin == null) {
+            throw new BusinessException("您不是系统管理员");
+        }
+
+        // 2. 查询目标用户
+        OrdinaryUser targetUser = ordinaryUserMapper.selectById(reqDTO.getTargetUserID());
+        if (targetUser == null) {
+            throw new BusinessException("目标用户不存在");
+        }
+
+        // 3. 直接覆盖更新（前端会传入完整信息）
+        targetUser.setUserName(reqDTO.getUserName());
+        targetUser.setPhoneNumber(reqDTO.getPhoneNumber());
+        targetUser.setUserMailbox(reqDTO.getUserMailbox());
+        targetUser.setRealName(reqDTO.getRealName());
+        targetUser.setGender(reqDTO.getGender());
+        targetUser.setDegree(reqDTO.getDegree());
+        targetUser.setSchool(reqDTO.getSchool());
+        targetUser.setUserPassword(reqDTO.getUserPassword());
+
+        ordinaryUserMapper.updateById(targetUser);
     }
 }

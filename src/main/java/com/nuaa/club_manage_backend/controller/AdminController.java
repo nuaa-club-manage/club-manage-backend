@@ -2,6 +2,7 @@ package com.nuaa.club_manage_backend.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.nuaa.club_manage_backend.common.Result;
+import com.nuaa.club_manage_backend.dto.req.AdminEditUserReqDTO;
 import com.nuaa.club_manage_backend.dto.req.AdminLoginReqDTO;
 import com.nuaa.club_manage_backend.dto.req.AdminUserSearchReqDTO;
 import com.nuaa.club_manage_backend.dto.resp.UserInfoRespDTO;
@@ -35,5 +36,16 @@ public class AdminController {
                                                       @RequestBody AdminUserSearchReqDTO reqDTO) {
         String adminId = (String) request.getAttribute("currentUserId");
         return Result.success(administratorService.searchUsersByAdmin(adminId, reqDTO));
+    }
+
+    /**
+     * 系统管理员修改用户资料
+     */
+    @PutMapping("/user/profile")
+    public Result<String> updateUserProfile(HttpServletRequest request,
+                                             @Validated @RequestBody AdminEditUserReqDTO reqDTO) {
+        String adminId = (String) request.getAttribute("currentUserId");
+        administratorService.updateUserBySystemAdmin(adminId, reqDTO);
+        return Result.success("用户资料修改成功");
     }
 }
