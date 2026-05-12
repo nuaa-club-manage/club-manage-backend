@@ -49,6 +49,7 @@ CREATE TABLE `ClubActivity` (
   `UserID` varchar(255) NOT NULL,
   `Title` varchar(255) NOT NULL,
   `Content` text,
+  `Location` varchar(255) DEFAULT NULL,
   `CapacityLimit` int DEFAULT NULL,
   `ActivityState` varchar(255) DEFAULT NULL,
   `PublishTime` datetime DEFAULT NULL,

@@ -25,6 +25,9 @@ public class ClubActivity {
     @TableField("Content")
     private String content;
 
+    @TableField("Location")
+    private String location;
+
     @TableField("CapacityLimit")
     private Integer capacityLimit;
 

@@ -31,3 +31,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Spring API Helper ###
+.spring-api-helper.json

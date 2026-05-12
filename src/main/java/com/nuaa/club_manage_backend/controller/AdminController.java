@@ -5,8 +5,11 @@ import com.nuaa.club_manage_backend.common.Result;
 import com.nuaa.club_manage_backend.dto.req.AdminEditUserReqDTO;
 import com.nuaa.club_manage_backend.dto.req.AdminLoginReqDTO;
 import com.nuaa.club_manage_backend.dto.req.AdminUserSearchReqDTO;
+import com.nuaa.club_manage_backend.dto.req.ActivityAuditReqDTO;
 import com.nuaa.club_manage_backend.dto.req.ClubAuditReqDTO;
 import com.nuaa.club_manage_backend.dto.req.ClubManagerSetReqDTO;
+import com.nuaa.club_manage_backend.dto.resp.ActivityListRespDTO;
+import com.nuaa.club_manage_backend.service.IClubActivityService;
 import com.nuaa.club_manage_backend.dto.resp.UserInfoRespDTO;
 import com.nuaa.club_manage_backend.entity.Administrator;
 import com.nuaa.club_manage_backend.dto.resp.ClubMemberListRespDTO;
@@ -33,6 +36,8 @@ public class AdminController {
     private IClubService clubService;
     @Autowired
     private IClubMemberService clubMemberService;
+    @Autowired
+    private IClubActivityService clubActivityService;
 
     /**
      * 管理员登录
@@ -126,6 +131,38 @@ public class AdminController {
             return Result.success("管理员权限设置成功");
         } else {
             return Result.success("管理员权限已取消");
+        }
+    }
+
+    /**
+     * 系统管理员查看待审核的活动列表
+     */
+    @GetMapping("/activities/pending")
+    public Result<List<ActivityListRespDTO>> getPendingActivities(HttpServletRequest request) {
+        String adminId = (String) request.getAttribute("currentUserId");
+        Administrator admin = administratorService.getById(adminId);
+        if (admin == null) {
+            throw new BusinessException("无权访问，仅管理员可执行此操作");
+        }
+        return Result.success(clubActivityService.getPendingActivities());
+    }
+
+    /**
+     * 系统管理员审核活动
+     */
+    @PostMapping("/activity/audit")
+    public Result<String> auditActivity(HttpServletRequest request,
+                                        @Validated @RequestBody ActivityAuditReqDTO reqDTO) {
+        String adminId = (String) request.getAttribute("currentUserId");
+        Administrator admin = administratorService.getById(adminId);
+        if (admin == null) {
+            throw new BusinessException("无权访问，仅管理员可执行此操作");
+        }
+        clubActivityService.auditActivity(reqDTO);
+        if (Boolean.TRUE.equals(reqDTO.getPass())) {
+            return Result.success("活动审核通过");
+        } else {
+            return Result.success("活动已拒绝");
         }
     }
 }
