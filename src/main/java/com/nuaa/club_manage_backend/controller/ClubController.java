@@ -54,10 +54,11 @@ public class ClubController {
     }
 
     /**
-     * 查看所有已成立的社团信息
+     * 查看所有已成立的社团信息（支持按社团名称模糊搜索）
      */
     @GetMapping("/list")
-    public Result<List<Club>> getActiveClubs() {
-        return Result.success(clubService.getActiveClubs());
+    public Result<List<Club>> getActiveClubs(
+            @RequestParam(required = false) String clubName) {
+        return Result.success(clubService.getActiveClubs(clubName));
     }
 }

@@ -209,7 +209,7 @@ public class ClubMemberServiceImpl extends ServiceImpl<ClubMemberMapper, ClubMem
     }
 
     @Override
-    public List<ClubMemberListRespDTO> getClubMembers(String managerUserId, String clubId) {
+    public List<ClubMemberListRespDTO> getClubMembers(String managerUserId, String clubId, String search) {
         // 1. 查出该用户管理的社团 ID 列表
         List<ClubMember> managedClubs = this.lambdaQuery()
                 .eq(ClubMember::getUserId, managerUserId)
@@ -238,11 +238,22 @@ public class ClubMemberServiceImpl extends ServiceImpl<ClubMemberMapper, ClubMem
             return List.of();
         }
 
+        // 4. 如果有搜索条件，按姓名或学号过滤
+        if (search != null && !search.isEmpty()) {
+            List<String> matchedUserIds = getUserIdsBySearch(search);
+            members = members.stream()
+                    .filter(m -> matchedUserIds.contains(m.getUserId()))
+                    .collect(Collectors.toList());
+            if (members.isEmpty()) {
+                return List.of();
+            }
+        }
+
         return buildMemberListResp(members);
     }
 
     @Override
-    public List<ClubMemberListRespDTO> getAllClubMembers() {
+    public List<ClubMemberListRespDTO> getAllClubMembers(String search) {
         // 查询所有已通过社团的已通过成员
         List<Club> activeClubs = clubMapper.selectList(
                 new QueryWrapper<Club>().eq("ClubState", "已通过")
@@ -259,6 +270,17 @@ public class ClubMemberServiceImpl extends ServiceImpl<ClubMemberMapper, ClubMem
                 .list();
         if (members.isEmpty()) {
             return List.of();
+        }
+
+        // 如果有搜索条件，按姓名或学号过滤
+        if (search != null && !search.isEmpty()) {
+            List<String> matchedUserIds = getUserIdsBySearch(search);
+            members = members.stream()
+                    .filter(m -> matchedUserIds.contains(m.getUserId()))
+                    .collect(Collectors.toList());
+            if (members.isEmpty()) {
+                return List.of();
+            }
         }
 
         return buildMemberListResp(members);
@@ -291,6 +313,15 @@ public class ClubMemberServiceImpl extends ServiceImpl<ClubMemberMapper, ClubMem
             }
             return dto;
         }).collect(Collectors.toList());
+    }
+
+    private List<String> getUserIdsBySearch(String search) {
+        return ordinaryUserMapper.selectList(
+                new QueryWrapper<OrdinaryUser>()
+                        .like("userName", search)
+                        .or()
+                        .like("userID", search)
+        ).stream().map(OrdinaryUser::getUserId).collect(Collectors.toList());
     }
 
     @Override

@@ -74,12 +74,13 @@ public class ClubMemberController {
     }
 
     /**
-     * 社团管理员查看自己管理的社团成员名单
+     * 社团管理员查看自己管理的社团成员名单（支持按姓名/学号模糊搜索）
      */
     @GetMapping("/list")
     public Result<List<ClubMemberListRespDTO>> getClubMembers(HttpServletRequest request,
-                                                               @RequestParam(required = false) String clubId) {
+                                                               @RequestParam(required = false) String clubId,
+                                                               @RequestParam(required = false) String search) {
         String userId = (String) request.getAttribute("currentUserId");
-        return Result.success(clubMemberService.getClubMembers(userId, clubId));
+        return Result.success(clubMemberService.getClubMembers(userId, clubId, search));
     }
 }

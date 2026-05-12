@@ -157,10 +157,12 @@ public class ClubServiceImpl extends ServiceImpl<ClubMapper, Club> implements IC
     }
 
     @Override
-    public List<Club> getActiveClubs() {
-        return this.lambdaQuery()
-                .eq(Club::getClubState, "已通过")
-                .list();
+    public List<Club> getActiveClubs(String clubName) {
+        var wrapper = new QueryWrapper<Club>().eq("ClubState", "已通过");
+        if (clubName != null && !clubName.isEmpty()) {
+            wrapper.like("ClubName", clubName);
+        }
+        return this.list(wrapper);
     }
 
     @Override

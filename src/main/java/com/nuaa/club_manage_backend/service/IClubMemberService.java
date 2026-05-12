@@ -39,14 +39,14 @@ public interface IClubMemberService extends IService<ClubMember> {
     void leaveClub(String userId, ClubLeaveReqDTO reqDTO);
 
     /**
-     * 社团管理员查看自己管理的社团成员名单
+     * 社团管理员查看自己管理的社团成员名单（支持按姓名/学号模糊搜索）
      */
-    List<ClubMemberListRespDTO> getClubMembers(String managerUserId, String clubId);
+    List<ClubMemberListRespDTO> getClubMembers(String managerUserId, String clubId, String search);
 
     /**
-     * 系统管理员查看所有已成立社团的成员名单
+     * 系统管理员查看所有已成立社团的成员名单（支持按姓名/学号模糊搜索）
      */
-    List<ClubMemberListRespDTO> getAllClubMembers();
+    List<ClubMemberListRespDTO> getAllClubMembers(String search);
 
     /**
      * 系统管理员设置/取消社团管理员

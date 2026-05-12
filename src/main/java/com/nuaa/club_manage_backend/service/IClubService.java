@@ -26,9 +26,9 @@ public interface IClubService extends IService<Club> {
     void updateClub(String userId, ClubUpdateReqDTO reqDTO);
 
     /**
-     * 查看所有已成立的社团信息
+     * 查看所有已成立的社团信息（支持按社团名称模糊搜索）
      */
-    List<Club> getActiveClubs();
+    List<Club> getActiveClubs(String clubName);
 
     /**
      * 管理员审核成立社团申请

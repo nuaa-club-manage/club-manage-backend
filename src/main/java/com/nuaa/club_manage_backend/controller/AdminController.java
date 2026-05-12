@@ -97,16 +97,17 @@ public class AdminController {
     }
 
     /**
-     * 系统管理员查看所有已成立社团的成员名单
+     * 系统管理员查看所有已成立社团的成员名单（支持按姓名/学号模糊搜索）
      */
     @GetMapping("/clubs/members")
-    public Result<List<ClubMemberListRespDTO>> getAllClubMembers(HttpServletRequest request) {
+    public Result<List<ClubMemberListRespDTO>> getAllClubMembers(HttpServletRequest request,
+                                                                  @RequestParam(required = false) String search) {
         String adminId = (String) request.getAttribute("currentUserId");
         Administrator admin = administratorService.getById(adminId);
         if (admin == null) {
             throw new BusinessException("无权访问，仅管理员可执行此操作");
         }
-        return Result.success(clubMemberService.getAllClubMembers());
+        return Result.success(clubMemberService.getAllClubMembers(search));
     }
 
     /**
