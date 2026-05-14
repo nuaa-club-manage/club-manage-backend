@@ -204,4 +204,23 @@ public class ClubServiceImpl extends ServiceImpl<ClubMapper, Club> implements IC
                 .eq(Club::getClubState, "待审核")
                 .list();
     }
+
+    @Override
+    public List<Club> getManagedClubs(String userId) {
+        // 1. 查出当前用户管理的社团 ID 列表
+        List<String> managedClubIds = clubMemberMapper.selectList(
+                new QueryWrapper<ClubMember>()
+                        .eq("UserID", userId)
+                        .eq("ClubManager", "是")
+        ).stream().map(ClubMember::getClubId).collect(Collectors.toList());
+
+        if (managedClubIds.isEmpty()) {
+            return List.of();
+        }
+
+        // 2. 查询这些社团的详细信息
+        return this.lambdaQuery()
+                .in(Club::getClubId, managedClubIds)
+                .list();
+    }
 }

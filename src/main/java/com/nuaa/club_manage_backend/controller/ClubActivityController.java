@@ -71,4 +71,13 @@ public class ClubActivityController {
             @RequestParam(required = false) String title) {
         return Result.success(clubActivityService.getPublishedActivities(title));
     }
+
+    /**
+     * 查看当前用户发布的活动
+     */
+    @GetMapping("/my")
+    public Result<List<ActivityListRespDTO>> getMyActivities(HttpServletRequest request) {
+        String userId = (String) request.getAttribute("currentUserId");
+        return Result.success(clubActivityService.getMyActivities(userId));
+    }
 }

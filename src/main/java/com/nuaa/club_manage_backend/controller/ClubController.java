@@ -61,4 +61,13 @@ public class ClubController {
             @RequestParam(required = false) String clubName) {
         return Result.success(clubService.getActiveClubs(clubName));
     }
+
+    /**
+     * 查看当前用户管理的社团
+     */
+    @GetMapping("/managed")
+    public Result<List<Club>> getManagedClubs(HttpServletRequest request) {
+        String userId = (String) request.getAttribute("currentUserId");
+        return Result.success(clubService.getManagedClubs(userId));
+    }
 }

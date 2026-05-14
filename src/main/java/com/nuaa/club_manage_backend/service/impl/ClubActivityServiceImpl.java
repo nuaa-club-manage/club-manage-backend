@@ -162,6 +162,14 @@ public class ClubActivityServiceImpl extends ServiceImpl<ClubActivityMapper, Clu
         return buildActivityListResp(activities);
     }
 
+    @Override
+    public List<ActivityListRespDTO> getMyActivities(String userId) {
+        List<ClubActivity> activities = this.lambdaQuery()
+                .eq(ClubActivity::getUserId, userId)
+                .list();
+        return buildActivityListResp(activities);
+    }
+
     private void checkClubManager(String userId, String clubId) {
         ClubMember member = clubMemberMapper.selectOne(
                 new QueryWrapper<ClubMember>()

@@ -44,4 +44,9 @@ public interface IClubActivityService extends IService<ClubActivity> {
      * 查看待审核的活动列表（系统管理员）
      */
     List<ActivityListRespDTO> getPendingActivities();
+
+    /**
+     * 查看当前用户发布的活动
+     */
+    List<ActivityListRespDTO> getMyActivities(String userId);
 }
