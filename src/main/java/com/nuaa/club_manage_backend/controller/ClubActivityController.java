@@ -2,6 +2,7 @@ package com.nuaa.club_manage_backend.controller;
 
 import com.nuaa.club_manage_backend.common.Result;
 import com.nuaa.club_manage_backend.dto.req.ActivityCreateReqDTO;
+import com.nuaa.club_manage_backend.dto.req.ActivityEndReqDTO;
 import com.nuaa.club_manage_backend.dto.req.ActivityUpdateReqDTO;
 import com.nuaa.club_manage_backend.dto.resp.ActivityListRespDTO;
 import com.nuaa.club_manage_backend.entity.Club;
@@ -48,13 +49,13 @@ public class ClubActivityController {
     }
 
     /**
-     * 结束活动
+     * 结束活动（需提交活动总结和到场名单）
      */
     @PutMapping("/end")
     public Result<String> endActivity(HttpServletRequest request,
-                                      @RequestParam String activityId) {
+                                      @Validated @RequestBody ActivityEndReqDTO reqDTO) {
         String userId = (String) request.getAttribute("currentUserId");
-        clubActivityService.endActivity(userId, activityId);
+        clubActivityService.endActivity(userId, reqDTO);
         return Result.success("活动已结束");
     }
 

@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.nuaa.club_manage_backend.dto.req.ActivityAuditReqDTO;
 import com.nuaa.club_manage_backend.dto.req.ActivityCreateReqDTO;
+import com.nuaa.club_manage_backend.dto.req.ActivityEndReqDTO;
 import com.nuaa.club_manage_backend.dto.req.ActivityUpdateReqDTO;
 import com.nuaa.club_manage_backend.dto.resp.ActivityListRespDTO;
 import com.nuaa.club_manage_backend.entity.Club;
@@ -103,8 +104,8 @@ public class ClubActivityServiceImpl extends ServiceImpl<ClubActivityMapper, Clu
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void endActivity(String userId, String activityId) {
-        ClubActivity activity = this.getById(activityId);
+    public void endActivity(String userId, ActivityEndReqDTO reqDTO) {
+        ClubActivity activity = this.getById(reqDTO.getActivityId());
         if (activity == null) {
             throw new BusinessException("活动不存在");
         }
@@ -115,6 +116,12 @@ public class ClubActivityServiceImpl extends ServiceImpl<ClubActivityMapper, Clu
             throw new BusinessException("只有已发布的活动才能结束");
         }
 
+        // 在 content 末尾追加活动总结和到场名单，用分隔符分隔
+        String separator = "\n===== 活动总结 =====\n";
+        String content = activity.getContent() + separator + reqDTO.getSummary()
+                + "\n===== 到场名单 =====\n" + reqDTO.getParticipantList();
+
+        activity.setContent(content);
         activity.setActivityState("已结束");
         this.updateById(activity);
     }

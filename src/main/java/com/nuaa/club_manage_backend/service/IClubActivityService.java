@@ -3,6 +3,7 @@ package com.nuaa.club_manage_backend.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.nuaa.club_manage_backend.dto.req.ActivityAuditReqDTO;
 import com.nuaa.club_manage_backend.dto.req.ActivityCreateReqDTO;
+import com.nuaa.club_manage_backend.dto.req.ActivityEndReqDTO;
 import com.nuaa.club_manage_backend.dto.req.ActivityUpdateReqDTO;
 import com.nuaa.club_manage_backend.dto.resp.ActivityListRespDTO;
 import com.nuaa.club_manage_backend.entity.ClubActivity;
@@ -26,9 +27,9 @@ public interface IClubActivityService extends IService<ClubActivity> {
     void updateActivity(String userId, ActivityUpdateReqDTO reqDTO);
 
     /**
-     * 结束活动
+     * 结束活动（需提交活动总结和到场名单）
      */
-    void endActivity(String userId, String activityId);
+    void endActivity(String userId, ActivityEndReqDTO reqDTO);
 
     /**
      * 删除活动
