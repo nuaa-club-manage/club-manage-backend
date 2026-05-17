@@ -26,7 +26,12 @@ public class JwtInterceptor implements HandlerInterceptor {
             throw new BusinessException(401, "无访问权限，请先登录");
         }
 
-        // 4. 有 Token，找我们之前写的 JwtUtils 工具类鉴定真伪
+        // 4. 去除 "Bearer " 前缀（前端标准 Authorization 头格式）
+        if (token.startsWith("Bearer ")) {
+            token = token.substring(7);
+        }
+
+        // 5. 有 Token，找我们之前写的 JwtUtils 工具类鉴定真伪
         String userId = JwtUtils.getUserIdByToken(token);
         if (userId == null) {
             // 解析失败（被篡改或已过期 7 天）

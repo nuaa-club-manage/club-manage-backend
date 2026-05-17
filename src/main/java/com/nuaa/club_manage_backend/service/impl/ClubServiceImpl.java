@@ -1,6 +1,7 @@
 package com.nuaa.club_manage_backend.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.nuaa.club_manage_backend.dto.req.ClubAuditReqDTO;
 import com.nuaa.club_manage_backend.dto.req.ClubCreateReqDTO;
@@ -9,12 +10,14 @@ import com.nuaa.club_manage_backend.dto.req.ClubUpdateReqDTO;
 import com.nuaa.club_manage_backend.entity.Club;
 import com.nuaa.club_manage_backend.entity.ClubActivity;
 import com.nuaa.club_manage_backend.entity.ClubMember;
+import com.nuaa.club_manage_backend.entity.OrdinaryUser;
 import com.nuaa.club_manage_backend.entity.RatingClub;
 import com.nuaa.club_manage_backend.entity.RegistrationInfo;
 import com.nuaa.club_manage_backend.exception.BusinessException;
 import com.nuaa.club_manage_backend.mapper.ClubActivityMapper;
 import com.nuaa.club_manage_backend.mapper.ClubMapper;
 import com.nuaa.club_manage_backend.mapper.ClubMemberMapper;
+import com.nuaa.club_manage_backend.mapper.OrdinaryUserMapper;
 import com.nuaa.club_manage_backend.mapper.RatingClubMapper;
 import com.nuaa.club_manage_backend.mapper.RegistrationInfoMapper;
 import com.nuaa.club_manage_backend.service.IClubService;
@@ -38,6 +41,8 @@ public class ClubServiceImpl extends ServiceImpl<ClubMapper, Club> implements IC
     private RegistrationInfoMapper registrationInfoMapper;
     @Autowired
     private RatingClubMapper ratingClubMapper;
+    @Autowired
+    private OrdinaryUserMapper ordinaryUserMapper;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -50,16 +55,23 @@ public class ClubServiceImpl extends ServiceImpl<ClubMapper, Club> implements IC
             throw new BusinessException("该社团名称已存在，请更换名称");
         }
 
-        // 2. 组装社团实体
+        // 2. 查询创建人的学校
+        OrdinaryUser creator = ordinaryUserMapper.selectById(userId);
+        if (creator == null) {
+            throw new BusinessException("用户不存在");
+        }
+
+        // 3. 组装社团实体
         Club club = new Club();
         club.setClubId(UUID.randomUUID().toString());
         club.setUserId(userId);
         club.setClubName(reqDTO.getClubName());
         club.setClubInformation(reqDTO.getClubInformation());
+        club.setSchool(creator.getSchool());
         club.setClubState("待审核");
         club.setEstablishmentTime(LocalDateTime.now());
 
-        // 3. 入库
+        // 4. 入库
         this.save(club);
     }
 
@@ -111,8 +123,9 @@ public class ClubServiceImpl extends ServiceImpl<ClubMapper, Club> implements IC
         );
 
         // 5. 更新社团状态为"已解散"
-        club.setClubState("已解散");
-        this.updateById(club);
+        this.update(new UpdateWrapper<Club>()
+                .eq("Clubid", clubId)
+                .set("ClubState", "已解散"));
     }
 
     @Override
@@ -188,7 +201,7 @@ public class ClubServiceImpl extends ServiceImpl<ClubMapper, Club> implements IC
             ClubMember member = new ClubMember();
             member.setClubId(club.getClubId());
             member.setUserId(club.getUserId());
-            member.setReviewState("已通过");
+            member.setReviewState("通过");
             member.setClubManager("是");
             clubMemberMapper.insert(member);
         } else {

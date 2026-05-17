@@ -4,6 +4,9 @@ import com.nuaa.club_manage_backend.common.Result;
 import com.nuaa.club_manage_backend.dto.req.ActivityCreateReqDTO;
 import com.nuaa.club_manage_backend.dto.req.ActivityUpdateReqDTO;
 import com.nuaa.club_manage_backend.dto.resp.ActivityListRespDTO;
+import com.nuaa.club_manage_backend.entity.Club;
+import com.nuaa.club_manage_backend.entity.ClubActivity;
+import com.nuaa.club_manage_backend.mapper.ClubMapper;
 import com.nuaa.club_manage_backend.service.IClubActivityService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +18,9 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/activities")
 public class ClubActivityController {
+
+    @Autowired
+    private ClubMapper clubMapper;
 
     @Autowired
     private IClubActivityService clubActivityService;
@@ -79,5 +85,29 @@ public class ClubActivityController {
     public Result<List<ActivityListRespDTO>> getMyActivities(HttpServletRequest request) {
         String userId = (String) request.getAttribute("currentUserId");
         return Result.success(clubActivityService.getMyActivities(userId));
+    }
+
+    /**
+     * 查看单个活动详情
+     */
+    @GetMapping("/detail")
+    public Result<ActivityListRespDTO> getActivityDetail(@RequestParam String activityId) {
+        ClubActivity activity = clubActivityService.getById(activityId);
+        if (activity == null) {
+            return Result.error("活动不存在");
+        }
+        Club club = clubMapper.selectById(activity.getClubId());
+        ActivityListRespDTO dto = new ActivityListRespDTO();
+        dto.setActivityId(activity.getActivityId());
+        dto.setClubId(activity.getClubId());
+        dto.setClubName(club != null ? club.getClubName() : "");
+        dto.setUserId(activity.getUserId());
+        dto.setTitle(activity.getTitle());
+        dto.setContent(activity.getContent());
+        dto.setLocation(activity.getLocation());
+        dto.setCapacityLimit(activity.getCapacityLimit());
+        dto.setActivityState(activity.getActivityState());
+        dto.setPublishTime(activity.getPublishTime());
+        return Result.success(dto);
     }
 }

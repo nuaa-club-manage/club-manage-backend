@@ -13,7 +13,6 @@ import com.nuaa.club_manage_backend.service.IClubActivityService;
 import com.nuaa.club_manage_backend.dto.resp.UserInfoRespDTO;
 import com.nuaa.club_manage_backend.entity.Administrator;
 import com.nuaa.club_manage_backend.dto.resp.ClubMemberListRespDTO;
-import com.nuaa.club_manage_backend.entity.Administrator;
 import com.nuaa.club_manage_backend.entity.Club;
 import com.nuaa.club_manage_backend.exception.BusinessException;
 import com.nuaa.club_manage_backend.service.IAdministratorService;

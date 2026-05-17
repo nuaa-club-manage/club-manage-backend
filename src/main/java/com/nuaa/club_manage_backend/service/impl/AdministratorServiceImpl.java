@@ -60,6 +60,8 @@ public class AdministratorServiceImpl extends ServiceImpl<AdministratorMapper, A
                     .or()
                     .like(OrdinaryUser::getUserName, keyword)
                     .or()
+                    .like(OrdinaryUser::getRealName, keyword)
+                    .or()
                     .like(OrdinaryUser::getPhoneNumber, keyword)
                     .or()
                     .like(OrdinaryUser::getUserMailbox, keyword)

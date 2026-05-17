@@ -70,4 +70,16 @@ public class ClubController {
         String userId = (String) request.getAttribute("currentUserId");
         return Result.success(clubService.getManagedClubs(userId));
     }
+
+    /**
+     * 查看单个社团详情
+     */
+    @GetMapping("/detail")
+    public Result<Club> getClubDetail(@RequestParam String clubId) {
+        Club club = clubService.getById(clubId);
+        if (club == null) {
+            return Result.error("社团不存在");
+        }
+        return Result.success(club);
+    }
 }
