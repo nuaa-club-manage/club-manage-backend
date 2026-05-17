@@ -27,6 +27,10 @@ import com.nuaa.club_manage_backend.mapper.UserMapper;
 import com.nuaa.club_manage_backend.service.IOrdinaryUserService;
 import com.nuaa.club_manage_backend.utils.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -36,11 +40,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class OrdinaryUserServiceImpl extends ServiceImpl<OrdinaryUserMapper, OrdinaryUser> implements IOrdinaryUserService {
-
-    /**
-     * 验证码缓存（key = contact, value = 验证码）
-     */
-    private static final Map<String, String> SMS_CODE_CACHE = new ConcurrentHashMap<>();
 
     /**
      * 图形验证码缓存（key = captchaId, value = 验证码文本）
@@ -59,6 +58,15 @@ public class OrdinaryUserServiceImpl extends ServiceImpl<OrdinaryUserMapper, Ord
     private RatingClubMapper ratingClubMapper;
     @Autowired
     private UserMapper userMapper;
+
+    @Autowired
+    private JavaMailSender mailSender;
+
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
+
+    @Value("${spring.mail.username}")
+    private String fromEmail;
 
     @Override
     public CaptchaRespDTO getCaptcha() {
@@ -85,13 +93,16 @@ public class OrdinaryUserServiceImpl extends ServiceImpl<OrdinaryUserMapper, Ord
 
         // 生成 6 位随机数字验证码
         String code = String.valueOf((int) ((Math.random() * 900000) + 100000));
-        SMS_CODE_CACHE.put(contact, code);
+        // 存入 Redis，5 分钟过期
+        stringRedisTemplate.opsForValue().set("verify_code:" + contact, code, java.time.Duration.ofMinutes(5));
 
         if (isEmail) {
-            System.out.println("===== 邮件服务模拟 =====");
-            System.out.println("发送至邮箱: " + contact);
-            System.out.println("验证码: " + code);
-            System.out.println("========================");
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(fromEmail);
+            message.setTo(contact);
+            message.setSubject("社团管理系统 - 邮箱验证码");
+            message.setText("您的验证码为: " + code + "，有效期5分钟。如非本人操作，请忽略此邮件。");
+            mailSender.send(message);
         } else {
             System.out.println("===== 短信服务模拟 =====");
             System.out.println("发送至手机: " + contact);
@@ -103,11 +114,11 @@ public class OrdinaryUserServiceImpl extends ServiceImpl<OrdinaryUserMapper, Ord
     @Override
     public void resetPassword(UserResetPwdReqDTO reqDTO) {
         // 1. 校验验证码
-        String cachedCode = SMS_CODE_CACHE.get(reqDTO.getContact());
+        String cachedCode = stringRedisTemplate.opsForValue().get("verify_code:" + reqDTO.getContact());
         if (cachedCode == null || !cachedCode.equals(reqDTO.getVerifyCode())) {
             throw new BusinessException("验证码错误或已失效");
         }
-        SMS_CODE_CACHE.remove(reqDTO.getContact());
+        stringRedisTemplate.delete("verify_code:" + reqDTO.getContact());
 
         // 2. 根据联系方式查找用户
         OrdinaryUser user = this.lambdaQuery()
@@ -127,11 +138,11 @@ public class OrdinaryUserServiceImpl extends ServiceImpl<OrdinaryUserMapper, Ord
     @Override
     public void register(UserRegisterReqDTO reqDTO) {
         // 1. 校验验证码
-        String cachedCode = SMS_CODE_CACHE.get(reqDTO.getContact());
+        String cachedCode = stringRedisTemplate.opsForValue().get("verify_code:" + reqDTO.getContact());
         if (cachedCode == null || !cachedCode.equals(reqDTO.getVerifyCode())) {
             throw new BusinessException("验证码错误或已过期");
         }
-        SMS_CODE_CACHE.remove(reqDTO.getContact());
+        stringRedisTemplate.delete("verify_code:" + reqDTO.getContact());
 
         // 2. 校验学号是否已被注册
         OrdinaryUser exist = this.getById(reqDTO.getUserId());
@@ -196,11 +207,11 @@ public class OrdinaryUserServiceImpl extends ServiceImpl<OrdinaryUserMapper, Ord
             if (reqDTO.getVerifyCode() == null || reqDTO.getVerifyCode().isEmpty()) {
                 throw new BusinessException("验证码不能为空");
             }
-            String cachedCode = SMS_CODE_CACHE.get(reqDTO.getContact());
+            String cachedCode = stringRedisTemplate.opsForValue().get("verify_code:" + reqDTO.getContact());
             if (cachedCode == null || !cachedCode.equals(reqDTO.getVerifyCode())) {
                 throw new BusinessException("验证码错误或已过期");
             }
-            SMS_CODE_CACHE.remove(reqDTO.getContact());
+            stringRedisTemplate.delete("verify_code:" + reqDTO.getContact());
         } else {
             throw new BusinessException("不支持的登录类型");
         }
