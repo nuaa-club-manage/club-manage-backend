@@ -34,3 +34,5 @@ build/
 
 ### Spring API Helper ###
 .spring-api-helper.json
+
+src/main/resources/application.properties
