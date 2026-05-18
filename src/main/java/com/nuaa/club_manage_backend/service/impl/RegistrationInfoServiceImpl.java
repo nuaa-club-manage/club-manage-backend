@@ -7,11 +7,13 @@ import com.nuaa.club_manage_backend.dto.req.RegistrationAuditReqDTO;
 import com.nuaa.club_manage_backend.dto.resp.ApprovedParticipantDTO;
 import com.nuaa.club_manage_backend.dto.resp.RegistrationAuditViewDTO;
 import com.nuaa.club_manage_backend.dto.resp.UserRegistrationDetailDTO;
+import com.nuaa.club_manage_backend.entity.Club;
 import com.nuaa.club_manage_backend.entity.ClubActivity;
 import com.nuaa.club_manage_backend.entity.ClubMember;
 import com.nuaa.club_manage_backend.entity.RegistrationInfo;
 import com.nuaa.club_manage_backend.exception.BusinessException;
 import com.nuaa.club_manage_backend.mapper.ClubActivityMapper;
+import com.nuaa.club_manage_backend.mapper.ClubMapper;
 import com.nuaa.club_manage_backend.mapper.ClubMemberMapper;
 import com.nuaa.club_manage_backend.mapper.RegistrationInfoMapper;
 import com.nuaa.club_manage_backend.service.IRegistrationInfoService;
@@ -31,6 +33,9 @@ public class RegistrationInfoServiceImpl extends ServiceImpl<RegistrationInfoMap
 
     @Autowired
     private ClubActivityMapper clubActivityMapper;
+
+    @Autowired
+    private ClubMapper clubMapper;
 
     @Override
     public void registerActivity(String userId, ActivityRegisterReqDTO reqDTO) {
@@ -155,7 +160,16 @@ public class RegistrationInfoServiceImpl extends ServiceImpl<RegistrationInfoMap
         Map<String, ClubActivity> activityMap = activities.stream()
                 .collect(Collectors.toMap(ClubActivity::getActivityId, a -> a));
 
-        // 3. 组装 DTO
+        // 3. 提取所有社团ID，批量查询社团名称
+        List<String> clubIds = activities.stream()
+                .map(ClubActivity::getClubId)
+                .distinct()
+                .collect(Collectors.toList());
+        Map<String, String> clubNameMap = clubIds.isEmpty() ? Collections.emptyMap() :
+                clubMapper.selectBatchIds(clubIds).stream()
+                        .collect(Collectors.toMap(Club::getClubId, Club::getClubName));
+
+        // 4. 组装 DTO
         return registrations.stream().map(r -> {
             ClubActivity activity = activityMap.get(r.getActivityId());
 
@@ -168,6 +182,7 @@ public class RegistrationInfoServiceImpl extends ServiceImpl<RegistrationInfoMap
                 dto.setContent(activity.getContent());
                 dto.setPublishTime(activity.getPublishTime());
                 dto.setClubId(activity.getClubId());
+                dto.setClubName(clubNameMap.get(activity.getClubId()));
             }
             return dto;
         }).collect(Collectors.toList());

@@ -13,4 +13,5 @@ public class UserRegistrationDetailDTO {
     private String reviewState;
     private LocalDateTime publishTime;
     private String clubId;
+    private String clubName;
 }
