@@ -50,4 +50,9 @@ public interface IClubActivityService extends IService<ClubActivity> {
      * 查看当前用户发布的活动
      */
     List<ActivityListRespDTO> getMyActivities(String userId);
+
+    /**
+     * 查看指定社团的所有活动（社团管理员专用，包含所有状态）
+     */
+    List<ActivityListRespDTO> getClubActivities(String userId, String clubId);
 }

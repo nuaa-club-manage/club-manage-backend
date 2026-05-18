@@ -90,11 +90,6 @@ public class ClubActivityServiceImpl extends ServiceImpl<ClubActivityMapper, Clu
         // 校验操作者是该活动所属社团的管理员
         checkClubManager(userId, activity.getClubId());
 
-        // 只有"待审核"或"未通过"状态的活动才能修改
-        if (!"待审核".equals(activity.getActivityState()) && !"未通过".equals(activity.getActivityState())) {
-            throw new BusinessException("当前活动状态不允许修改");
-        }
-
         activity.setTitle(reqDTO.getTitle());
         activity.setContent(reqDTO.getContent());
         activity.setLocation(reqDTO.getLocation());
@@ -136,11 +131,6 @@ public class ClubActivityServiceImpl extends ServiceImpl<ClubActivityMapper, Clu
 
         checkClubManager(userId, activity.getClubId());
 
-        // 只有待审核或未通过的活动才能删除
-        if (!"待审核".equals(activity.getActivityState()) && !"未通过".equals(activity.getActivityState())) {
-            throw new BusinessException("只有待审核或未通过的活动才能删除");
-        }
-
         // 级联删除关联的报名信息
         registrationInfoMapper.delete(
                 new QueryWrapper<RegistrationInfo>().eq("ActivityID", activityId)
@@ -173,6 +163,15 @@ public class ClubActivityServiceImpl extends ServiceImpl<ClubActivityMapper, Clu
     public List<ActivityListRespDTO> getMyActivities(String userId) {
         List<ClubActivity> activities = this.lambdaQuery()
                 .eq(ClubActivity::getUserId, userId)
+                .list();
+        return buildActivityListResp(activities);
+    }
+
+    @Override
+    public List<ActivityListRespDTO> getClubActivities(String userId, String clubId) {
+        checkClubManager(userId, clubId);
+        List<ClubActivity> activities = this.lambdaQuery()
+                .eq(ClubActivity::getClubId, clubId)
                 .list();
         return buildActivityListResp(activities);
     }

@@ -89,6 +89,16 @@ public class ClubActivityController {
     }
 
     /**
+     * 查看指定社团的所有活动（社团管理员专用）
+     */
+    @GetMapping("/club")
+    public Result<List<ActivityListRespDTO>> getClubActivities(HttpServletRequest request,
+                                                                @RequestParam String clubId) {
+        String userId = (String) request.getAttribute("currentUserId");
+        return Result.success(clubActivityService.getClubActivities(userId, clubId));
+    }
+
+    /**
      * 查看单个活动详情
      */
     @GetMapping("/detail")
