@@ -83,4 +83,12 @@ public class ClubMemberController {
         String userId = (String) request.getAttribute("currentUserId");
         return Result.success(clubMemberService.getClubMembers(userId, clubId, search));
     }
+
+    /**
+     * 公开查询指定社团的成员数量（无需登录）
+     */
+    @GetMapping("/count")
+    public Result<Long> countClubMembers(@RequestParam String clubId) {
+        return Result.success(clubMemberService.countClubMembers(clubId));
+    }
 }

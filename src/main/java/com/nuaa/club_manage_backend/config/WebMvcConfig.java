@@ -32,7 +32,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
                         "/api/user/sendCode",
                         "/api/user/resetPassword",
                         "/api/admin/login",
-                        "/api/rating/public/**"
+                        "/api/rating/public/**",
+                        "/api/member/count"
                 );
     }
 

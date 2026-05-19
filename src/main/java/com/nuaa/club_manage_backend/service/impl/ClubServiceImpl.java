@@ -47,9 +47,10 @@ public class ClubServiceImpl extends ServiceImpl<ClubMapper, Club> implements IC
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void createClub(String userId, ClubCreateReqDTO reqDTO) {
-        // 1. 校验社团名称是否已存在
+        // 1. 校验社团名称是否已存在（排除已解散的社团）
         Club exist = this.lambdaQuery()
                 .eq(Club::getClubName, reqDTO.getClubName())
+                .ne(Club::getClubState, "已解散")
                 .one();
         if (exist != null) {
             throw new BusinessException("该社团名称已存在，请更换名称");
@@ -142,9 +143,10 @@ public class ClubServiceImpl extends ServiceImpl<ClubMapper, Club> implements IC
             throw new BusinessException("当前社团状态不允许修改信息");
         }
 
-        // 3. 校验社团名称是否与其他社团冲突（排除自身）
+        // 3. 校验社团名称是否与其他活跃社团冲突（排除自身和已解散的）
         Club duplicate = this.lambdaQuery()
                 .eq(Club::getClubName, reqDTO.getClubName())
+                .ne(Club::getClubState, "已解散")
                 .ne(Club::getClubId, reqDTO.getClubId())
                 .one();
         if (duplicate != null) {

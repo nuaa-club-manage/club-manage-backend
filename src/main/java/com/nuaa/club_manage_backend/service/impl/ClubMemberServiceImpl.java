@@ -285,6 +285,14 @@ public class ClubMemberServiceImpl extends ServiceImpl<ClubMemberMapper, ClubMem
         return buildMemberListResp(members);
     }
 
+    @Override
+    public long countClubMembers(String clubId) {
+        return this.lambdaQuery()
+                .eq(ClubMember::getClubId, clubId)
+                .eq(ClubMember::getReviewState, "通过")
+                .count();
+    }
+
     private List<ClubMemberListRespDTO> buildMemberListResp(List<ClubMember> members) {
         // 批量查社团名称和用户信息
         List<String> clubIds = members.stream().map(ClubMember::getClubId).distinct().collect(Collectors.toList());

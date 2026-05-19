@@ -52,4 +52,9 @@ public interface IClubMemberService extends IService<ClubMember> {
      * 系统管理员设置/取消社团管理员
      */
     void setClubManager(ClubManagerSetReqDTO reqDTO);
+
+    /**
+     * 公开查询指定社团的成员数量
+     */
+    long countClubMembers(String clubId);
 }
