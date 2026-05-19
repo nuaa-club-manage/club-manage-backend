@@ -42,6 +42,11 @@ public interface IOrdinaryUserService extends IService<OrdinaryUser> {
     UserInfoRespDTO getCurrentUserInfo(String userId);
 
     /**
+     * 根据 userId 查询指定用户信息（任意登录用户可调用）
+     */
+    UserInfoRespDTO getUserInfoById(String targetUserId);
+
+    /**
      * 修改个人基本信息
      */
     void updateUserInfo(String userId, UserInfoUpdateReqDTO reqDTO);

@@ -48,6 +48,14 @@ public class UserController {
     }
 
     /**
+     * 根据 userId 查询指定用户信息（任意登录用户可调用，无需管理员权限）
+     */
+    @GetMapping("/info/{targetUserId}")
+    public Result<UserInfoRespDTO> getUserInfoById(@PathVariable String targetUserId) {
+        return Result.success(ordinaryUserService.getUserInfoById(targetUserId));
+    }
+
+    /**
      * 修改个人基本信息
      */
     @PutMapping("/info")

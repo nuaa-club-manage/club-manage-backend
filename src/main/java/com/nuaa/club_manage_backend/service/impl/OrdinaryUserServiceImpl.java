@@ -240,6 +240,26 @@ public class OrdinaryUserServiceImpl extends ServiceImpl<OrdinaryUserMapper, Ord
     }
 
     @Override
+    public UserInfoRespDTO getUserInfoById(String targetUserId) {
+        OrdinaryUser user = this.getById(targetUserId);
+        if (user == null) {
+            throw new BusinessException("用户不存在");
+        }
+
+        UserInfoRespDTO dto = new UserInfoRespDTO();
+        dto.setUserId(user.getUserId());
+        dto.setUserName(user.getUserName());
+        dto.setPhoneNumber(user.getPhoneNumber());
+        dto.setUserMailbox(user.getUserMailbox());
+        dto.setRealName(user.getRealName());
+        dto.setGender(user.getGender());
+        dto.setDegree(user.getDegree());
+        dto.setSchool(user.getSchool());
+        dto.setRegisterTime(user.getRegisterTime());
+        return dto;
+    }
+
+    @Override
     public void updateUserInfo(String userId, UserInfoUpdateReqDTO reqDTO) {
         OrdinaryUser user = this.getById(userId);
         if (user == null) {
