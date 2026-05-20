@@ -44,4 +44,9 @@ public interface IClubService extends IService<Club> {
      * 查看当前用户管理的社团
      */
     List<Club> getManagedClubs(String userId);
+
+    /**
+     * 查看当前用户申请成立的社团（待审核与未通过状态）
+     */
+    List<Club> getMyApplications(String userId);
 }

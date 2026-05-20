@@ -63,6 +63,15 @@ public class ClubController {
     }
 
     /**
+     * 查看当前用户申请成立的社团（待审核与未通过状态）
+     */
+    @GetMapping("/my-applications")
+    public Result<List<Club>> getMyApplications(HttpServletRequest request) {
+        String userId = (String) request.getAttribute("currentUserId");
+        return Result.success(clubService.getMyApplications(userId));
+    }
+
+    /**
      * 查看当前用户管理的社团
      */
     @GetMapping("/managed")

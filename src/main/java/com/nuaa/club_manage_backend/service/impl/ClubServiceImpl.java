@@ -221,6 +221,14 @@ public class ClubServiceImpl extends ServiceImpl<ClubMapper, Club> implements IC
     }
 
     @Override
+    public List<Club> getMyApplications(String userId) {
+        return this.lambdaQuery()
+                .eq(Club::getUserId, userId)
+                .in(Club::getClubState, "待审核", "未通过")
+                .list();
+    }
+
+    @Override
     public List<Club> getManagedClubs(String userId) {
         // 1. 查出当前用户管理的社团 ID 列表
         List<String> managedClubIds = clubMemberMapper.selectList(
