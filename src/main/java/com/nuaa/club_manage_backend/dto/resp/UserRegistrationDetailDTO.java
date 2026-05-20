@@ -11,6 +11,7 @@ public class UserRegistrationDetailDTO {
     private String title;
     private String content;
     private String reviewState;
+    private String activityState;
     private LocalDateTime publishTime;
     private String clubId;
     private String clubName;

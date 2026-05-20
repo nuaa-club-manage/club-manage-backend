@@ -48,7 +48,16 @@ public class RegistrationInfoServiceImpl extends ServiceImpl<RegistrationInfoMap
             throw new BusinessException("您已报名该活动，请勿重复提交");
         }
 
-        // 2. 组装报名记录
+        // 2. 校验活动状态（已结束的活动不可报名）
+        ClubActivity activity = clubActivityMapper.selectById(reqDTO.getActivityId());
+        if (activity == null) {
+            throw new BusinessException("活动不存在");
+        }
+        if ("已结束".equals(activity.getActivityState())) {
+            throw new BusinessException("活动已结束，无法报名");
+        }
+
+        // 3. 组装报名记录
         RegistrationInfo registration = new RegistrationInfo();
         registration.setActivityId(reqDTO.getActivityId());
         registration.setUserId(userId);
@@ -56,7 +65,7 @@ public class RegistrationInfoServiceImpl extends ServiceImpl<RegistrationInfoMap
         registration.setPhoneNumber(reqDTO.getPhoneNumber());
         registration.setReviewState("审核中");
 
-        // 3. 入库
+        // 4. 入库
         this.save(registration);
     }
 
@@ -180,6 +189,7 @@ public class RegistrationInfoServiceImpl extends ServiceImpl<RegistrationInfoMap
             if (activity != null) {
                 dto.setTitle(activity.getTitle());
                 dto.setContent(activity.getContent());
+                dto.setActivityState(activity.getActivityState());
                 dto.setPublishTime(activity.getPublishTime());
                 dto.setClubId(activity.getClubId());
                 dto.setClubName(clubNameMap.get(activity.getClubId()));
