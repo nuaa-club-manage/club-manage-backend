@@ -118,6 +118,14 @@ public class ClubActivityServiceImpl extends ServiceImpl<ClubActivityMapper, Clu
 
         activity.setContent(content);
         activity.setActivityState("已结束");
+
+        // 删除该活动中处于"审核中"状态的报名记录
+        registrationInfoMapper.delete(
+                new QueryWrapper<RegistrationInfo>()
+                        .eq("ActivityID", reqDTO.getActivityId())
+                        .eq("ReviewState", "审核中")
+        );
+
         this.updateById(activity);
     }
 
