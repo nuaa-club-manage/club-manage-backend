@@ -112,7 +112,9 @@ public class AdministratorServiceImpl extends ServiceImpl<AdministratorMapper, A
         targetUser.setGender(reqDTO.getGender());
         targetUser.setDegree(reqDTO.getDegree());
         targetUser.setSchool(reqDTO.getSchool());
-        targetUser.setUserPassword(reqDTO.getUserPassword());
+        if (reqDTO.getUserPassword() != null && !reqDTO.getUserPassword().isBlank()) {
+            targetUser.setUserPassword(reqDTO.getUserPassword());
+        }
 
         ordinaryUserMapper.updateById(targetUser);
     }
