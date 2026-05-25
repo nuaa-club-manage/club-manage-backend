@@ -10,9 +10,11 @@ import com.nuaa.club_manage_backend.dto.req.AdminUserSearchReqDTO;
 import com.nuaa.club_manage_backend.dto.resp.UserInfoRespDTO;
 import com.nuaa.club_manage_backend.entity.Administrator;
 import com.nuaa.club_manage_backend.entity.OrdinaryUser;
+import com.nuaa.club_manage_backend.entity.User;
 import com.nuaa.club_manage_backend.exception.BusinessException;
 import com.nuaa.club_manage_backend.mapper.AdministratorMapper;
 import com.nuaa.club_manage_backend.mapper.OrdinaryUserMapper;
+import com.nuaa.club_manage_backend.mapper.UserMapper;
 import com.nuaa.club_manage_backend.service.IAdministratorService;
 import com.nuaa.club_manage_backend.utils.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +27,9 @@ public class AdministratorServiceImpl extends ServiceImpl<AdministratorMapper, A
 
     @Autowired
     private OrdinaryUserMapper ordinaryUserMapper;
+
+    @Autowired
+    private UserMapper userMapper;
 
     @Override
     public String login(AdminLoginReqDTO reqDTO) {
@@ -104,7 +109,27 @@ public class AdministratorServiceImpl extends ServiceImpl<AdministratorMapper, A
             throw new BusinessException("目标用户不存在");
         }
 
-        // 3. 直接覆盖更新（前端会传入完整信息）
+        // 3. 校验手机号唯一性（仅当修改时检查）
+        if (reqDTO.getPhoneNumber() != null && !reqDTO.getPhoneNumber().equals(targetUser.getPhoneNumber())) {
+            Long phoneCount = ordinaryUserMapper.selectCount(new LambdaQueryWrapper<OrdinaryUser>()
+                    .eq(OrdinaryUser::getPhoneNumber, reqDTO.getPhoneNumber())
+                    .ne(OrdinaryUser::getUserId, reqDTO.getTargetUserID()));
+            if (phoneCount > 0) {
+                throw new BusinessException("该手机号已被其他用户绑定");
+            }
+        }
+
+        // 4. 校验邮箱唯一性（仅当修改时检查）
+        if (reqDTO.getUserMailbox() != null && !reqDTO.getUserMailbox().equals(targetUser.getUserMailbox())) {
+            Long emailCount = ordinaryUserMapper.selectCount(new LambdaQueryWrapper<OrdinaryUser>()
+                    .eq(OrdinaryUser::getUserMailbox, reqDTO.getUserMailbox())
+                    .ne(OrdinaryUser::getUserId, reqDTO.getTargetUserID()));
+            if (emailCount > 0) {
+                throw new BusinessException("该邮箱已被其他用户绑定");
+            }
+        }
+
+        // 5. 直接覆盖更新（前端会传入完整信息）
         targetUser.setUserName(reqDTO.getUserName());
         targetUser.setPhoneNumber(reqDTO.getPhoneNumber());
         targetUser.setUserMailbox(reqDTO.getUserMailbox());
@@ -117,5 +142,14 @@ public class AdministratorServiceImpl extends ServiceImpl<AdministratorMapper, A
         }
 
         ordinaryUserMapper.updateById(targetUser);
+
+        // 6. 同步更新 User 表密码
+        if (reqDTO.getUserPassword() != null && !reqDTO.getUserPassword().isBlank()) {
+            User baseUser = userMapper.selectById(reqDTO.getTargetUserID());
+            if (baseUser != null) {
+                baseUser.setUserPassword(reqDTO.getUserPassword());
+                userMapper.updateById(baseUser);
+            }
+        }
     }
 }

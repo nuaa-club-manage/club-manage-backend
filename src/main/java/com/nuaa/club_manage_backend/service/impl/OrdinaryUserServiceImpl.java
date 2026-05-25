@@ -15,6 +15,7 @@ import com.nuaa.club_manage_backend.entity.ClubActivity;
 import com.nuaa.club_manage_backend.entity.ClubMember;
 import com.nuaa.club_manage_backend.entity.OrdinaryUser;
 import com.nuaa.club_manage_backend.entity.RatingClub;
+import com.nuaa.club_manage_backend.entity.User;
 import com.nuaa.club_manage_backend.entity.RegistrationInfo;
 import com.nuaa.club_manage_backend.exception.BusinessException;
 import com.nuaa.club_manage_backend.mapper.ClubActivityMapper;
@@ -133,6 +134,13 @@ public class OrdinaryUserServiceImpl extends ServiceImpl<OrdinaryUserMapper, Ord
         // 3. 更新密码
         user.setUserPassword(reqDTO.getNewPassword());
         this.updateById(user);
+
+        // 4. 同步更新 User 表密码
+        User baseUser = userMapper.selectById(user.getUserId());
+        if (baseUser != null) {
+            baseUser.setUserPassword(reqDTO.getNewPassword());
+            userMapper.updateById(baseUser);
+        }
     }
 
     @Override
@@ -150,7 +158,18 @@ public class OrdinaryUserServiceImpl extends ServiceImpl<OrdinaryUserMapper, Ord
             throw new BusinessException("该学号已被注册");
         }
 
-        // 3. 组装新用户
+        // 3. 校验手机号/邮箱是否已被注册
+        boolean contactExists;
+        if (reqDTO.getContact().contains("@")) {
+            contactExists = this.lambdaQuery().eq(OrdinaryUser::getUserMailbox, reqDTO.getContact()).count() > 0;
+        } else {
+            contactExists = this.lambdaQuery().eq(OrdinaryUser::getPhoneNumber, reqDTO.getContact()).count() > 0;
+        }
+        if (contactExists) {
+            throw new BusinessException("该手机号/邮箱已被注册");
+        }
+
+        // 4. 组装新用户
         OrdinaryUser newUser = new OrdinaryUser();
         newUser.setUserId(reqDTO.getUserId());
         newUser.setUserPassword(reqDTO.getUserPassword());
@@ -165,8 +184,15 @@ public class OrdinaryUserServiceImpl extends ServiceImpl<OrdinaryUserMapper, Ord
             newUser.setPhoneNumber(reqDTO.getContact());
         }
 
-        // 4. 入库
+        // 5. 入库
         this.save(newUser);
+
+        // 6. 同步插入 User 表（基础登录认证表）
+        User baseUser = new User();
+        baseUser.setUserId(reqDTO.getUserId());
+        baseUser.setUserPassword(reqDTO.getUserPassword());
+        baseUser.setUserType("user");
+        userMapper.insert(baseUser);
     }
 
     @Override
@@ -266,6 +292,28 @@ public class OrdinaryUserServiceImpl extends ServiceImpl<OrdinaryUserMapper, Ord
             throw new BusinessException("用户不存在");
         }
 
+        // 校验手机号唯一性（仅当修改时检查）
+        if (reqDTO.getPhoneNumber() != null && !reqDTO.getPhoneNumber().equals(user.getPhoneNumber())) {
+            boolean phoneExists = this.lambdaQuery()
+                    .eq(OrdinaryUser::getPhoneNumber, reqDTO.getPhoneNumber())
+                    .ne(OrdinaryUser::getUserId, userId)
+                    .count() > 0;
+            if (phoneExists) {
+                throw new BusinessException("该手机号已被其他用户绑定");
+            }
+        }
+
+        // 校验邮箱唯一性（仅当修改时检查）
+        if (reqDTO.getUserMailbox() != null && !reqDTO.getUserMailbox().equals(user.getUserMailbox())) {
+            boolean emailExists = this.lambdaQuery()
+                    .eq(OrdinaryUser::getUserMailbox, reqDTO.getUserMailbox())
+                    .ne(OrdinaryUser::getUserId, userId)
+                    .count() > 0;
+            if (emailExists) {
+                throw new BusinessException("该邮箱已被其他用户绑定");
+            }
+        }
+
         user.setUserName(reqDTO.getUserName());
         user.setPhoneNumber(reqDTO.getPhoneNumber());
         user.setUserMailbox(reqDTO.getUserMailbox());
@@ -296,6 +344,13 @@ public class OrdinaryUserServiceImpl extends ServiceImpl<OrdinaryUserMapper, Ord
 
         user.setUserPassword(reqDTO.getNewPassword());
         this.updateById(user);
+
+        // 同步更新 User 表密码
+        User baseUser = userMapper.selectById(userId);
+        if (baseUser != null) {
+            baseUser.setUserPassword(reqDTO.getNewPassword());
+            userMapper.updateById(baseUser);
+        }
     }
 
     @Override

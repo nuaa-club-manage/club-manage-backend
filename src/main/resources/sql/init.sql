@@ -19,7 +19,9 @@ CREATE TABLE `OrdinaryUser` (
   `Degree` varchar(255) DEFAULT NULL,
   `School` varchar(255) DEFAULT NULL,
   `RegisterTime` datetime DEFAULT NULL,
-  PRIMARY KEY (`userID`)
+  PRIMARY KEY (`userID`),
+  UNIQUE KEY `uk_phonenumber` (`Phonenumber`),
+  UNIQUE KEY `uk_usermailbox` (`userMailbox`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 3. Administrator类
